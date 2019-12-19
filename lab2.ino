@@ -10,6 +10,8 @@ const int trigPinSensor3 = 5;
 Servo baseServo;
 int basePosition = 0;
 
+float threshold = 30;
+
 void setup() {
   baseServo.attach(3);
   setupInit(echoPinSensor1, trigPinSensor1);
@@ -35,14 +37,18 @@ void changeBasePosition() {
   float pulseSensor2 = getPulse(echoPinSensor2, trigPinSensor2);
   float pulseSensor3 = getPulse(echoPinSensor3, trigPinSensor3);
   float minimum = min(pulseSensor1, min(pulseSensor2, pulseSensor3));
-  if (minimum == pulseSensor1) {
-    basePosition = 135;
-  }
-  else if (minimum == pulseSensor2) {
-    basePosition = 90;
-  }
-  else {
-    basePosition = 45;
+  float distance = getDist(minimum);
+  if (distance <= threshold)
+  {
+      if (minimum == pulseSensor1) {
+        basePosition = 135;
+      }
+      else if (minimum == pulseSensor2) {
+        basePosition = 90;
+      }
+      else {
+        basePosition = 45;
+    }
   }
 }
 
@@ -52,4 +58,10 @@ float getPulse(int echoPin, int trigPin) {
   digitalWrite(trigPin, LOW);
   long duration = pulseIn(echoPin, HIGH);
   return duration;
+}
+
+float getDist(float pulse) {
+  const float speedOfSoundMPerSec = 340.0;
+  const float speedOfSoundCmPerUs = speedOfSoundMPerSec / 10000.0;
+  return pulse * speedOfSoundCmPerUs / 2.0;
 }
